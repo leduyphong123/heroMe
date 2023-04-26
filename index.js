@@ -1,19 +1,37 @@
 let ctx = document.getElementById("canvasGame");
 let cv = ctx.getContext("2d");
 
-let speedMap = 0;//run speed map
 
 ctx.width = innerWidth;
 ctx.height = innerHeight;
 function Player(positer, velocity) {
     this.positer = positer;
     this.velocity = velocity;
-    this.width = 100;
+    this.width = 30;
     this.height = 100;
     this.gravitation = 0.2; //trọng lực rơi
+
+    this.isAttack;
+    this.attackBox = {
+        positer: this.positer,
+        velocity: {
+            x: 0,
+            y: 0
+        },
+        width: 70,
+        height: this.height,
+    }
+
     this.draw = function () {
         cv.fillStyle = "red";
         cv.fillRect(this.positer.x, this.positer.y, this.width, this.height);
+
+        //attackbox
+        if (this.isAttack) {
+            cv.fillStyle = "black";
+            cv.fillRect(this.attackBox.positer.x, this.attackBox.positer.y, this.attackBox.width, this.attackBox.height);
+        }
+
     }
     this.update = function () {
         this.draw();
@@ -26,22 +44,68 @@ function Player(positer, velocity) {
             this.velocity.y += this.gravitation;
         }
 
+        this.attack = function () {
+            this.isAttack = true;
+            setTimeout(() => { this.isAttack = false }, 100);
+        }
+
     }
 }
 
 function MapCreate(positer, status) {
     this.positer = positer;
     this.status = status;
-    // this.width = width;
-    // this.height = height;
     this.draw = function () {
         cv.fillStyle = "blue";
         cv.fillRect(this.positer.x, this.positer.y, this.status.width, this.status.height);
     }
 }
 
+function Monster(positer) {
+    this.positer = positer;
+    this.width = 50;
+    this.height = 50;
+    this.hp = 50;
+    this.dameAttack = 0;
+    this.isAttack;
+    this.attackBox = {
+        positer: {
+            x: this.positer.x,
+            y: this.positer.y
+        },
+        velocity: {
+            x: 0,
+            y: 0
+        },
+        width: 20,
+        height: 20,
+    }
+    this.draw = function () {
+        cv.fillStyle = "yellow";
+        cv.fillRect(this.positer.x, this.positer.y, this.width, this.height);
+
+        //hp
+        cv.fillStyle = "gray";
+        cv.fillRect(this.positer.x, this.positer.y - 20, this.hp, 10);
+        cv.fillStyle = "red";
+        cv.fillRect(this.positer.x, this.positer.y - 20, this.hp - this.dameAttack, 10);
+
+        //attack
+        if (this.isAttack) {
+
+            cv.fillStyle = "red";
+            cv.fillRect(this.attackBox.positer.x, this.attackBox.positer.y, this.attackBox.width, this.attackBox.height);
+        }
+    }
+    this.update = function () {
+        this.draw();
+        this.attackBox.positer.x += this.attackBox.velocity.x;
+        this.attackBox.positer.y += this.attackBox.velocity.y;
+    }
+}
+
 //khoi tao doi tuong
-const player = new Player({ x: 1, y: 430 }, { x: 0, y: 10 });
+const player = new Player({ x: 100, y: 430 }, { x: 0, y: 10 });
 
 let maps = [new MapCreate({ x: 0, y: ctx.height - 10 }, { width: 2000, height: 10 }),
 new MapCreate({ x: 300, y: 250 }, { width: 30, height: 10 }),
@@ -49,12 +113,17 @@ new MapCreate({ x: 400, y: 150 }, { width: 200, height: 10 }),
 new MapCreate({ x: 500, y: 350 }, { width: 200, height: 10 }),
 new MapCreate({ x: 700, y: 350 }, { width: 200, height: 10 }),
 ];
+
+let monster = new Monster({ x: 200, y: ctx.height - 80 });
 //key is event
 let keyEvt = {
     right: {
         visit: false,
     },
     left: {
+        visit: false,
+    },
+    dame: {
         visit: false,
     }
 }
@@ -76,6 +145,7 @@ function startGame() {
         }
 
     }
+    monster.update();
 
     // key is event
     if (keyEvt.right.visit && player.positer.x < 400) {
@@ -86,21 +156,59 @@ function startGame() {
         player.velocity.x = 0;
         if (keyEvt.right.visit) {
             player.positer.x -= 5;
+            //map remote
             for (let i in maps) {
-                maps[i].positer.x -= 5
+                maps[i].positer.x -= 5;
             }
+            //monter remote
+            monster.positer.x -= 5;
         } else if (keyEvt.left.visit) {
 
             player.positer.x += 5;
+            //map remote
             for (let i in maps) {
                 maps[i].positer.x += 5
             }
+            //monter remote
+            monster.positer.x += 5;
         }
     }
 
+
+    //attack hero
+    if (player.attackBox.positer.x + player.attackBox.width >= monster.positer.x
+        && player.attackBox.positer.x <= monster.positer.x + monster.width
+        && player.attackBox.positer.y + player.attackBox.height >= monster.positer.y
+        && player.attackBox.positer.y <= monster.positer.y + monster.height
+        && count == 1
+    ) {
+        if (keyEvt.dame.visit === true) {
+            player.attack();
+            monster.dameAttack += 1;
+            console.log(monster.dameAttack);
+        }
+        count = 0;
+
+    }
+
+    //monster dame hero
+    // if (monster.dameAttack > 0 && monster.hp > 0) {
+    //     if (monster.attackBox.positer.x >= player.positer.x +player.width && monster.attackBox.positer.x +monster.attackBox.width<=player.width) {
+    //         monster.isAttack = true;
+    //         monster.attackBox.velocity.x = -1;
+    //         console.log("dame");
+    //     } else {
+    //         monster.isAttack = false;
+
+    //         monster.attackBox.velocity.x = 0;
+    //         console.log(" no dame");
+
+    //     }
+    // }
+
 }
 startGame();
-
+let count; // dem lan dame
 
 //key value
 window.addEventListener("keydown", (evt) => {
@@ -113,12 +221,13 @@ window.addEventListener("keydown", (evt) => {
             keyEvt.left.visit = true;
             break;
         case "Space":
-            // if (player.positer.y + player.height >= ctx.height - 10 || player.positer.y + player.height>= (()=>{for(let i in maps) {maps[i].positer.x-10}})) {
-            // }
             if (player.positer.y >= 200) {
                 player.velocity.y = -10;
-
             }
+            break;
+        case "KeyE":
+            keyEvt.dame.visit = true;
+            count = 1;
             break;
         default:
             break;
@@ -133,7 +242,10 @@ window.addEventListener("keyup", (evt) => {
         case "KeyA":
             keyEvt.left.visit = false;
             break;
-
+        case "KeyE":
+            keyEvt.dame.visit = false;
+            count = 0;
+            break;
         default:
             break;
     }
