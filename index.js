@@ -9,6 +9,7 @@ let heroAttack = new Image();
 let monsterBatIdle = new Image();
 let monsterSkill = new Image();
 let mapDefault = new Image();
+let background = new Image();
 heroIdle.src = "img/hero/Idle.png";
 heroWalk.src = "img/hero/Walk.png";
 heroJump.src = "img/hero/Jump.png";
@@ -16,6 +17,7 @@ heroAttack.src = "img/hero/Attack.png";
 monsterBatIdle.src = "img/monster/BatAlbino_Flying.png";
 monsterSkill.src = "img/Free_Skills.png";
 mapDefault.src = "img/map/Basic_Top.png";
+background.src = "img/map/background.png";
 
 
 ctx.width = innerWidth;
@@ -52,7 +54,7 @@ function Player(positer, velocity, img) {
     this.imgRun = this.imgAnimation.idle.imge;
     this.draw = function () {
         if (this.hp > 0) {
-            cv.drawImage(this.imgRun, 64 * this.imgIndex, 0, 64, 64, this.positer.x, this.positer.y, this.width, this.height);
+            cv.drawImage(this.imgRun, 64 * this.imgIndex, 0, 64, 64, this.positer.x, this.positer.y + 24, this.width, this.height);
 
             //attackbox
             if (this.isAttack) {
@@ -90,13 +92,13 @@ function Player(positer, velocity, img) {
     }
 }
 
-function MapCreate(positer, status) {
+function MapCreate(positer, status,img) {
     this.positer = positer;
     this.status = status;
+    this.img=img;
     this.draw = function () {
-        // cv.fillStyle = "blue";
-        // cv.fillRect(this.positer.x, this.positer.y, this.status.width, this.status.height);
-        cv.drawImage(mapDefault, this.positer.x, this.positer.y, this.status.width, this.status.height);
+
+        cv.drawImage(this.img, this.positer.x, this.positer.y, this.status.width, this.status.height);
 
     }
 }
@@ -141,15 +143,15 @@ function Monster(positer) {
 
             //attack
             if (this.monsterHits) {
-            cv.drawImage(this.imgAnimation.skill.imge, 32 * this.imgIndex, 0, 32, 32, this.attackBox.positer.x, this.attackBox.positer.y, this.attackBox.width, this.attackBox.height);
+                cv.drawImage(this.imgAnimation.skill.imge, 32 * this.imgIndex, 0, 32, 32, this.attackBox.positer.x, this.attackBox.positer.y, this.attackBox.width, this.attackBox.height);
 
             }
         }
     }
     this.update = function () {
         this.imgIndex++;
-        if(this.imgIndex>this.imgIndexEnd-1){
-            this.imgIndex=0;
+        if (this.imgIndex > this.imgIndexEnd - 1) {
+            this.imgIndex = 0;
         }
         this.draw();
         this.attackBox.positer.x += this.attackBox.velocity.x;
@@ -160,14 +162,26 @@ function Monster(positer) {
 //khoi tao doi tuong
 const player = new Player({ x: 100, y: 430 }, { x: 0, y: 10 }, heroIdle);
 
-let maps = [new MapCreate({ x: 0, y: ctx.height - 22 }, { width: 2000, height: 30 }),
-new MapCreate({ x: 300, y: 250 }, { width: 30, height: 10 }),
-new MapCreate({ x: 400, y: 150 }, { width: 200, height: 10 }),
-new MapCreate({ x: 500, y: 350 }, { width: 200, height: 10 }),
-new MapCreate({ x: 700, y: 350 }, { width: 200, height: 10 }),
+
+let maps = [
+    new MapCreate({ x: 0, y: 0 }, { width: ctx.width, height: ctx.height },background),
+    new MapCreate({ x: ctx.width, y: 0 }, { width: ctx.width, height: ctx.height },background),
+new MapCreate({ x: 0, y: ctx.height - 30 }, { width: 3000, height: 30 },mapDefault),
+new MapCreate({ x: 300, y: 600 }, { width: 100, height: 10 },mapDefault),
+new MapCreate({ x: 450, y: 500 }, { width: 100, height: 10 },mapDefault),
+new MapCreate({ x: 500, y: 350 }, { width: 200, height: 10 },mapDefault),
+new MapCreate({ x: 700, y: 350 }, { width: 200, height: 10 },mapDefault),
 ];
 
 let monster = new Monster({ x: 200, y: ctx.height - 70 });
+
+let monsters = [new Monster({ x: 300, y: ctx.height - 70 }),
+new Monster({ x: 400, y: ctx.height - 70 }),
+new Monster({ x: 600, y: ctx.height - 70 }),
+new Monster({ x: 700, y: ctx.height - 70 }),
+new Monster({ x: 200, y: ctx.height - 70 })
+]
+
 //key is event
 let keyEvt = {
     right: {
@@ -186,18 +200,19 @@ function startGame() {
     cv.fillStyle = "white";
     cv.fillRect(0, 0, ctx.width, ctx.height);
 
-    player.update();
     for (let i in maps) {
         maps[i].draw();
         //dung tren map
-        if (player.positer.y + player.height+10 <= maps[i].positer.y
+        if (player.positer.y + player.height <= maps[i].positer.y
             && player.positer.y + player.height + player.velocity.y >= maps[i].positer.y
-            && player.positer.x + player.width >= maps[i].positer.x
-            && player.positer.x <= maps[i].positer.x + maps[i].status.width) {
+            && player.positer.x + player.width - 40 >= maps[i].positer.x
+            && player.positer.x <= maps[i].positer.x + maps[i].status.width - 40) {
             player.velocity.y = 0;
         }
 
     }
+    player.update();
+
     monster.update();
 
     // key is event
@@ -256,20 +271,19 @@ function startGame() {
 
         if (player.positer.x + player.width <= monster.positer.x) {
             monster.attackBox.velocity.x = - 1;
-            if (monster.attackBox.positer.x <= (player.positer.x + player.width)
-            ) {
+            if (monster.attackBox.positer.x <= (player.positer.x + player.width)) {
                 player.hp -= 10;
-                console.log(player.hp);
+                console.log(player.hp + "b");
 
                 monster.attackBox.velocity.x = 0;
                 monster.attackBox.positer.x = monster.positer.x;
                 monster.attackBox.positer.y = monster.positer.y;
             }
-        } else if (player.positer.x >= monster.positer.x + monster.width) {
+        } else if (player.positer.x >= (monster.positer.x + monster.width)) {
             monster.attackBox.velocity.x = 1;
             if (monster.attackBox.positer.x + monster.attackBox.width >= player.positer.x) {
-                player.hp -= 100;
-                console.log(player.hp);
+                player.hp -= 10;
+                console.log(player.hp + "a");
                 monster.attackBox.velocity.x = 0;
                 monster.attackBox.positer.x = monster.positer.x;
                 monster.attackBox.positer.y = monster.positer.y;
@@ -279,6 +293,7 @@ function startGame() {
     }
 
 }
+
 startGame();
 let playerHits; // dem lan danh cua hero
 
@@ -312,7 +327,7 @@ window.addEventListener("keydown", (evt) => {
             keyEvt.dame.visit = true;
             playerHits = 1;
             player.imgAnimation.idle.isThis = false;
-            if(player.imgAnimation.idle.isThis==false){
+            if (player.imgAnimation.idle.isThis == false) {
                 player.imgRun = player.imgAnimation.attack.imge;
                 player.imgIndexEnd = player.imgAnimation.attack.indexNumber;
             }
@@ -345,7 +360,7 @@ window.addEventListener("keyup", (evt) => {
         case "KeyE":
             keyEvt.dame.visit = false;
             playerHits = 0;
-      
+
             setTimeout(() => {
                 player.imgRun = player.imgAnimation.idle.imge;
                 player.imgIndexEnd = player.imgAnimation.idle.indexNumber;
