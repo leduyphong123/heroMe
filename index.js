@@ -20,8 +20,8 @@ mapDefault.src = "img/map/Basic_Top.png";
 background.src = "img/map/background.png";
 
 
-ctx.width = innerWidth;
-ctx.height = innerHeight;
+ctx.width = 1024;
+ctx.height = 567;
 function Player(positer, velocity, img) {
     this.positer = positer;
     this.velocity = velocity;
@@ -92,10 +92,10 @@ function Player(positer, velocity, img) {
     }
 }
 
-function MapCreate(positer, status,img) {
+function MapCreate(positer, status, img) {
     this.positer = positer;
     this.status = status;
-    this.img=img;
+    this.img = img;
     this.draw = function () {
 
         cv.drawImage(this.img, this.positer.x, this.positer.y, this.status.width, this.status.height);
@@ -164,22 +164,23 @@ const player = new Player({ x: 100, y: 430 }, { x: 0, y: 10 }, heroIdle);
 
 
 let maps = [
-    new MapCreate({ x: 0, y: 0 }, { width: ctx.width, height: ctx.height },background),
-    new MapCreate({ x: ctx.width, y: 0 }, { width: ctx.width, height: ctx.height },background),
-new MapCreate({ x: 0, y: ctx.height - 30 }, { width: 3000, height: 30 },mapDefault),
-new MapCreate({ x: 300, y: 600 }, { width: 100, height: 10 },mapDefault),
-new MapCreate({ x: 450, y: 500 }, { width: 100, height: 10 },mapDefault),
-new MapCreate({ x: 500, y: 350 }, { width: 200, height: 10 },mapDefault),
-new MapCreate({ x: 700, y: 350 }, { width: 200, height: 10 },mapDefault),
+    new MapCreate({ x: 0, y: 0 }, { width: ctx.width, height: ctx.height }, background),
+    new MapCreate({ x: ctx.width, y: 0 }, { width: ctx.width, height: ctx.height }, background),
+    new MapCreate({ x: 0, y: ctx.height - 30 }, { width: 3000, height: 30 }, mapDefault),
+    new MapCreate({ x: 300, y: 600 }, { width: 100, height: 10 }, mapDefault),
+    new MapCreate({ x: 450, y: 500 }, { width: 100, height: 10 }, mapDefault),
+    new MapCreate({ x: 500, y: 350 }, { width: 200, height: 10 }, mapDefault),
+    new MapCreate({ x: 700, y: 350 }, { width: 200, height: 10 }, mapDefault),
 ];
 
 let monster = new Monster({ x: 200, y: ctx.height - 70 });
 
-let monsters = [new Monster({ x: 300, y: ctx.height - 70 }),
-new Monster({ x: 400, y: ctx.height - 70 }),
-new Monster({ x: 600, y: ctx.height - 70 }),
-new Monster({ x: 700, y: ctx.height - 70 }),
-new Monster({ x: 200, y: ctx.height - 70 })
+let monsters = [
+    new Monster({ x: 300, y: ctx.height - 70 }),
+    new Monster({ x: 400, y: ctx.height - 70 }),
+    new Monster({ x: 600, y: ctx.height - 70 }),
+    new Monster({ x: 700, y: ctx.height - 70 }),
+    new Monster({ x: 200, y: ctx.height - 70 })
 ]
 
 //key is event
