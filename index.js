@@ -10,7 +10,7 @@ function Player(positer, velocity) {
     this.width = 30;
     this.height = 100;
     this.gravitation = 0.2; //trọng lực rơi
-
+    this.hp=1000;
     this.isAttack;
     this.attackBox = {
         positer: this.positer,
@@ -23,13 +23,15 @@ function Player(positer, velocity) {
     }
 
     this.draw = function () {
-        cv.fillStyle = "red";
-        cv.fillRect(this.positer.x, this.positer.y, this.width, this.height);
-
-        //attackbox
-        if (this.isAttack) {
-            cv.fillStyle = "black";
-            cv.fillRect(this.attackBox.positer.x, this.attackBox.positer.y, this.attackBox.width, this.attackBox.height);
+        if(this.hp>0){
+            cv.fillStyle = "red";
+            cv.fillRect(this.positer.x, this.positer.y, this.width, this.height);
+    
+            //attackbox
+            if (this.isAttack) {
+                cv.fillStyle = "black";
+                cv.fillRect(this.attackBox.positer.x, this.attackBox.positer.y, this.attackBox.width, this.attackBox.height);
+            }
         }
 
     }
@@ -67,7 +69,7 @@ function Monster(positer) {
     this.height = 50;
     this.hp = 50;
     this.dameAttack = 0;
-    this.isAttack;
+    this.monsterHits;
     this.attackBox = {
         positer: {
             x: this.positer.x,
@@ -81,20 +83,22 @@ function Monster(positer) {
         height: 20,
     }
     this.draw = function () {
-        cv.fillStyle = "yellow";
-        cv.fillRect(this.positer.x, this.positer.y, this.width, this.height);
+        if(this.hp>0){
 
-        //hp
-        cv.fillStyle = "gray";
-        cv.fillRect(this.positer.x, this.positer.y - 20, this.hp, 10);
-        cv.fillStyle = "red";
-        cv.fillRect(this.positer.x, this.positer.y - 20, this.hp - this.dameAttack, 10);
-
-        //attack
-        if (this.isAttack) {
-
+            cv.fillStyle = "yellow";
+            cv.fillRect(this.positer.x, this.positer.y, this.width, this.height);
+    
+            //hp
+            cv.fillStyle = "gray";
+            cv.fillRect(this.positer.x, this.positer.y - 20, this.width, 10);
             cv.fillStyle = "red";
-            cv.fillRect(this.attackBox.positer.x, this.attackBox.positer.y, this.attackBox.width, this.attackBox.height);
+            cv.fillRect(this.positer.x, this.positer.y - 20, this.hp, 10);
+    
+            //attack
+            if (this.monsterHits) {   
+                cv.fillStyle = "red";
+                cv.fillRect(this.attackBox.positer.x, this.attackBox.positer.y, this.attackBox.width, this.attackBox.height);
+            }
         }
     }
     this.update = function () {
@@ -180,35 +184,51 @@ function startGame() {
         && player.attackBox.positer.x <= monster.positer.x + monster.width
         && player.attackBox.positer.y + player.attackBox.height >= monster.positer.y
         && player.attackBox.positer.y <= monster.positer.y + monster.height
-        && count == 1
+        && playerHits == 1
     ) {
         if (keyEvt.dame.visit === true) {
             player.attack();
-            monster.dameAttack += 1;
+            monster.hp -= 1;
             console.log(monster.dameAttack);
+            monster.monsterHits = true;
         }
-        count = 0;
+        playerHits = 0;
+    }
+
+    // monster dame hero
+    if ( monster.hp > 0 && player.hp>0
+        && player.positer.x >= (monster.positer.x - 200)
+        && player.positer.x + player.width <= (monster.positer.x + monster.width + 200)
+        && monster.monsterHits == true) {
+
+        if (player.positer.x + player.width <= monster.positer.x) {
+            monster.attackBox.velocity.x = - 1;
+            if (monster.attackBox.positer.x <= (player.positer.x + player.width)
+            ) {
+                player.hp-=100;
+                console.log(player.hp);
+
+                monster.attackBox.velocity.x = 0;
+                monster.attackBox.positer.x = monster.positer.x;
+                monster.attackBox.positer.y = monster.positer.y;
+            }
+        } else if (player.positer.x >= monster.positer.x + monster.width) {
+            monster.attackBox.velocity.x = 1;
+            if (monster.attackBox.positer.x + monster.attackBox.width >= player.positer.x) {
+                player.hp-=100;
+                console.log(player.hp);
+                monster.attackBox.velocity.x = 0;
+                monster.attackBox.positer.x = monster.positer.x;
+                monster.attackBox.positer.y = monster.positer.y;
+            }
+        }
 
     }
 
-    //monster dame hero
-    // if (monster.dameAttack > 0 && monster.hp > 0) {
-    //     if (monster.attackBox.positer.x >= player.positer.x +player.width && monster.attackBox.positer.x +monster.attackBox.width<=player.width) {
-    //         monster.isAttack = true;
-    //         monster.attackBox.velocity.x = -1;
-    //         console.log("dame");
-    //     } else {
-    //         monster.isAttack = false;
-
-    //         monster.attackBox.velocity.x = 0;
-    //         console.log(" no dame");
-
-    //     }
-    // }
-
 }
 startGame();
-let count; // dem lan dame
+let playerHits; // dem lan danh cua hero
+// let monsterHits=false; // lan quai danh
 
 //key value
 window.addEventListener("keydown", (evt) => {
@@ -227,7 +247,7 @@ window.addEventListener("keydown", (evt) => {
             break;
         case "KeyE":
             keyEvt.dame.visit = true;
-            count = 1;
+            playerHits = 1;
             break;
         default:
             break;
@@ -244,7 +264,7 @@ window.addEventListener("keyup", (evt) => {
             break;
         case "KeyE":
             keyEvt.dame.visit = false;
-            count = 0;
+            playerHits = 0;
             break;
         default:
             break;
