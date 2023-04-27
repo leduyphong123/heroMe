@@ -12,11 +12,15 @@ function Player(positer, velocity) {
     this.gravitation = 0.2; //trọng lực rơi
     this.hp=1000;
     this.isAttack;
+    this.offSet={x:0,y:0}
     this.attackBox = {
-        positer: this.positer,
-        velocity: {
-            x: 0,
-            y: 0
+        positer: {
+            x:this.positer.x,
+            y:this.positer.y
+        },
+        velocity:{
+            x:0,
+            y:0
         },
         width: 70,
         height: this.height,
@@ -39,6 +43,8 @@ function Player(positer, velocity) {
         this.draw();
         this.positer.x += this.velocity.x;
         this.positer.y += this.velocity.y;
+        this.attackBox.positer.x=this.positer.x+this.attackBox.velocity.x;
+        this.attackBox.positer.y=this.positer.y
         //check vat the roi toi man hinh duoi chua
         if (this.positer.y + this.height >= ctx.height) {
             this.velocity.y = 0;
@@ -180,6 +186,10 @@ function startGame() {
 
 
     //attack hero
+    if(keyEvt.dame.visit===true){
+        player.attack();
+
+    }
     if (player.attackBox.positer.x + player.attackBox.width >= monster.positer.x
         && player.attackBox.positer.x <= monster.positer.x + monster.width
         && player.attackBox.positer.y + player.attackBox.height >= monster.positer.y
@@ -205,7 +215,7 @@ function startGame() {
             monster.attackBox.velocity.x = - 1;
             if (monster.attackBox.positer.x <= (player.positer.x + player.width)
             ) {
-                player.hp-=100;
+                player.hp-=10;
                 console.log(player.hp);
 
                 monster.attackBox.velocity.x = 0;
@@ -228,7 +238,7 @@ function startGame() {
 }
 startGame();
 let playerHits; // dem lan danh cua hero
-// let monsterHits=false; // lan quai danh
+
 
 //key value
 window.addEventListener("keydown", (evt) => {
@@ -236,13 +246,16 @@ window.addEventListener("keydown", (evt) => {
     switch (evt.code) {
         case "KeyD":
             keyEvt.right.visit = true;
+            player.attackBox.velocity.x=0;
+
             break;
         case "KeyA":
             keyEvt.left.visit = true;
+            player.attackBox.velocity.x=-40;
             break;
         case "Space":
             if (player.positer.y >= 200) {
-                player.velocity.y = -10;
+                player.velocity.y = -player.width;
             }
             break;
         case "KeyE":
