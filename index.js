@@ -1,166 +1,23 @@
+import MapCreate from "./entity/map.js";
+import Player from "./entity/hero.js";
+import Monster from "./entity/monster.js";
+
 let ctx = document.getElementById("canvasGame");
 let cv = ctx.getContext("2d");
 
 //img
-let heroIdle = new Image();
-let heroWalk = new Image();
-let heroJump = new Image();
-let heroAttack = new Image();
-let monsterBatIdle = new Image();
-let monsterSkill = new Image();
+
 let mapDefault = new Image();
 let background = new Image();
-heroIdle.src = "img/hero/Idle.png";
-heroWalk.src = "img/hero/Walk.png";
-heroJump.src = "img/hero/Jump.png";
-heroAttack.src = "img/hero/Attack.png";
-monsterBatIdle.src = "img/monster/BatAlbino_Flying.png";
-monsterSkill.src = "img/Free_Skills.png";
 mapDefault.src = "img/map/Basic_Top.png";
 background.src = "img/map/background.png";
 
 
 ctx.width = 1024;
 ctx.height = 567;
-function Player(positer, velocity, img) {
-    this.positer = positer;
-    this.velocity = velocity;
-    this.width = 100;
-    this.height = 100;
-    this.gravitation = 0.2; //trọng lực rơi
-    this.hp = 1000;
-    this.isAttack;
-    this.attackBox = {
-        positer: {
-            x: this.positer.x,
-            y: this.positer.y
-        },
-        velocity: {
-            x: 0,
-            y: 0
-        },
-        width: 70,
-        height: this.height,
-    };
-    this.img = img;
-    this.imgIndex = 0;
-    this.imgIndexEnd = 14;
-    this.imgAnimation = {
-        idle: { imge: heroIdle, indexNumber: 14, isThis: true },
-        walk: { imge: heroWalk, indexNumber: 8 },
-        jump: { imge: heroJump, indexNumber: 19 },
-        attack: { imge: heroAttack, indexNumber: 7, isThis: false },
-    }
-    this.imgRun = this.imgAnimation.idle.imge;
-    this.draw = function () {
-        if (this.hp > 0) {
-            cv.drawImage(this.imgRun, 64 * this.imgIndex, 0, 64, 64, this.positer.x, this.positer.y + 24, this.width, this.height);
-
-            //attackbox
-            if (this.isAttack) {
-                // cv.fillStyle = "black";
-                // cv.fillRect(this.attackBox.positer.x, this.attackBox.positer.y, this.attackBox.width, this.attackBox.height);
-                cv.drawImage(this.imgRun, 64 * this.imgIndex, 0, 64, 64, this.attackBox.positer.x, this.attackBox.positer.y, this.attackBox.width, this.attackBox.height);
-
-            }
-        }
-
-    }
-    this.update = function () {
-        this.imgIndex++;
-        if (this.imgIndex > this.imgIndexEnd - 1) {
-            this.imgIndex = 0;
-        }
-        this.draw();
-        this.positer.x += this.velocity.x;
-        this.positer.y += this.velocity.y;
-        this.attackBox.positer.x = this.positer.x + this.attackBox.velocity.x;
-        this.attackBox.positer.y = this.positer.y
-        //check vat the roi toi man hinh duoi chua
-        if (this.positer.y + this.height >= ctx.height) {
-            this.velocity.y = 0;
-        } else {
-            this.velocity.y += this.gravitation;
-        }
-
-        this.attack = function () {
-            this.isAttack = true;
-            setTimeout(() => { this.isAttack = false }, 100);
-        }
-
-
-    }
-}
-
-function MapCreate(positer, status, img) {
-    this.positer = positer;
-    this.status = status;
-    this.img = img;
-    this.draw = function () {
-
-        cv.drawImage(this.img, this.positer.x, this.positer.y, this.status.width, this.status.height);
-
-    }
-}
-
-function Monster(positer) {
-    this.positer = positer;
-    this.width = 50;
-    this.height = 50;
-    this.hp = 50;
-    this.dameAttack = 0;
-    this.monsterHits;
-    this.attackBox = {
-        positer: {
-            x: this.positer.x,
-            y: this.positer.y
-        },
-        velocity: {
-            x: 0,
-            y: 0
-        },
-        width: 20,
-        height: 20,
-    }
-    this.img = monsterBatIdle;
-    this.imgIndex = 0;
-    this.imgIndexEnd = 4;
-    this.imgAnimation = {
-        idle: { imge: monsterBatIdle, indexNumber: 4 },
-        skill: { imge: monsterSkill, indexNumber: 1 },
-
-    }
-    this.imgRun = this.imgAnimation.idle.imge;
-    this.draw = function () {
-        if (this.hp > 0) {
-
-            cv.drawImage(this.imgRun, 32 * this.imgIndex, 0, 32, 32, this.positer.x, this.positer.y, this.width, this.height);
-            //hp
-            cv.fillStyle = "gray";
-            cv.fillRect(this.positer.x, this.positer.y - 20, this.width, 10);
-            cv.fillStyle = "red";
-            cv.fillRect(this.positer.x, this.positer.y - 20, this.hp, 10);
-
-            //attack
-            if (this.monsterHits) {
-                cv.drawImage(this.imgAnimation.skill.imge, 32 * this.imgIndex, 0, 32, 32, this.attackBox.positer.x, this.attackBox.positer.y, this.attackBox.width, this.attackBox.height);
-
-            }
-        }
-    }
-    this.update = function () {
-        this.imgIndex++;
-        if (this.imgIndex > this.imgIndexEnd - 1) {
-            this.imgIndex = 0;
-        }
-        this.draw();
-        this.attackBox.positer.x += this.attackBox.velocity.x;
-        this.attackBox.positer.y += this.attackBox.velocity.y;
-    }
-}
 
 //khoi tao doi tuong
-const player = new Player({ x: 100, y: 430 }, { x: 0, y: 10 }, heroIdle);
+const player = new Player({ x: 100, y: 430 }, { x: 0, y: 10 });
 
 
 let maps = [
@@ -373,3 +230,5 @@ window.addEventListener("keyup", (evt) => {
             break;
     }
 })
+
+export {cv,ctx};
